@@ -1,218 +1,1576 @@
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Game Data Mining</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surviving the Videogame Industry — Data Mining</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
-  <!-- Tailwind -->
-  <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* ============================================
+           DESIGN SYSTEM — CSS VARIABLES
+        ============================================ */
+        :root {
+            --bg:        #080c14;
+            --bg-2:      #0d1424;
+            --bg-3:      #111827;
+            --surface:   #161f30;
+            --surface-2: #1e2d45;
+            --border:    rgba(255,255,255,0.07);
+            --blue:      #3b82f6;
+            --blue-dim:  #1d4ed8;
+            --cyan:      #22d3ee;
+            --green:     #34d399;
+            --amber:     #fbbf24;
+            --text-1:    #f1f5f9;
+            --text-2:    #94a3b8;
+            --text-3:    #475569;
+            --accent-glow: rgba(59,130,246,0.15);
+        }
 
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+        * { box-sizing: border-box; }
 
-  <!-- GSAP -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+        html { scroll-behavior: smooth; }
 
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #0b1120;
-      color: white;
-    }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-1);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
 
-    .text-gradient {
-      background: linear-gradient(to right, #60a5fa, #34d399);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
+        /* ============================================
+           TYPOGRAPHY
+        ============================================ */
+        h1, h2, h3, h4, .font-display {
+            font-family: 'Syne', sans-serif;
+        }
 
-    .glass {
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.1);
-    }
+        /* ============================================
+           BACKGROUND TEXTURE
+        ============================================ */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: 
+                radial-gradient(ellipse 80% 50% at 20% 10%, rgba(59,130,246,0.06) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 80% 80%, rgba(34,211,238,0.04) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
 
-    .reveal {
-      clip-path: inset(100% 0 0 0);
-    }
-  </style>
+        /* ============================================
+           NOISE OVERLAY
+        ============================================ */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        /* ============================================
+           NAV
+        ============================================ */
+        nav {
+            background: rgba(8,12,20,0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-link {
+            position: relative;
+            color: var(--text-2);
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            transition: color 0.3s;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px; left: 0;
+            width: 0; height: 1px;
+            background: var(--blue);
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover { color: var(--text-1); }
+        .nav-link:hover::after { width: 100%; }
+
+        /* ============================================
+           SECTION CONTAINERS
+        ============================================ */
+        .section-inner { position: relative; z-index: 1; }
+
+        /* ============================================
+           HERO ELEMENTS
+        ============================================ */
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--blue);
+            border: 1px solid rgba(59,130,246,0.3);
+            padding: 0.4rem 1rem;
+            border-radius: 99px;
+            background: rgba(59,130,246,0.08);
+        }
+
+        .hero-title {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(2.8rem, 7vw, 6.5rem);
+            font-weight: 800;
+            line-height: 1.0;
+            letter-spacing: -0.03em;
+        }
+
+        .text-gradient-blue {
+            background: linear-gradient(135deg, #60a5fa 0%, #22d3ee 50%, #34d399 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ============================================
+           STAT CALLOUT CARDS
+        ============================================ */
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--blue), transparent);
+            opacity: 0.6;
+        }
+        .stat-number {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+        .stat-label {
+            font-size: 0.78rem;
+            font-weight: 400;
+            color: var(--text-2);
+            letter-spacing: 0.04em;
+            margin-top: 0.35rem;
+        }
+
+        /* ============================================
+           IMAGE CONTAINERS
+        ============================================ */
+        .img-wrap {
+            overflow: hidden;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            position: relative;
+        }
+        .img-wrap img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .img-wrap:hover img { transform: scale(1.03); }
+
+        /* Clip-path reveal on scroll */
+        .img-reveal {
+            clip-path: inset(100% 0% 0% 0%);
+        }
+
+        /* ============================================
+           SECTION LABELS
+        ============================================ */
+        .section-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--blue);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .section-label::before {
+            content: '';
+            display: inline-block;
+            width: 24px;
+            height: 1px;
+            background: var(--blue);
+        }
+
+        /* ============================================
+           SECTION HEADINGS
+        ============================================ */
+        .section-heading {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-weight: 800;
+            line-height: 1.05;
+            letter-spacing: -0.02em;
+        }
+
+        /* ============================================
+           CONTENT CARDS
+        ============================================ */
+        .content-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: border-color 0.3s, transform 0.3s;
+        }
+        .content-card:hover {
+            border-color: rgba(59,130,246,0.35);
+            transform: translateY(-2px);
+        }
+
+        /* ============================================
+           DIVIDERS
+        ============================================ */
+        .section-divider {
+            border: none;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border) 30%, var(--border) 70%, transparent);
+            margin: 0;
+        }
+
+        /* ============================================
+           MODEL BADGE
+        ============================================ */
+        .model-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(59,130,246,0.1);
+            border: 1px solid rgba(59,130,246,0.25);
+            color: #93c5fd;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 0.3rem 0.75rem;
+            border-radius: 6px;
+        }
+
+        /* ============================================
+           CODE BLOCK
+        ============================================ */
+        .code-block {
+            background: #0a1628;
+            border: 1px solid rgba(59,130,246,0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            color: #7dd3fc;
+            line-height: 1.7;
+            overflow-x: auto;
+        }
+
+        /* ============================================
+           VIZ CAPTION
+        ============================================ */
+        .viz-caption {
+            font-size: 0.82rem;
+            color: var(--text-2);
+            line-height: 1.6;
+            padding: 0.75rem 1rem;
+            border-left: 2px solid rgba(59,130,246,0.4);
+            margin-top: 0.75rem;
+            background: rgba(59,130,246,0.04);
+            border-radius: 0 6px 6px 0;
+        }
+
+        /* ============================================
+           TEAM CARDS
+        ============================================ */
+        .team-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: border-color 0.4s, box-shadow 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+        .team-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(59,130,246,0.04) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .team-card:hover {
+            border-color: rgba(59,130,246,0.3);
+            box-shadow: 0 8px 40px rgba(59,130,246,0.08);
+        }
+
+        .avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid var(--border);
+            flex-shrink: 0;
+        }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-2);
+            border: 1px solid var(--border);
+            padding: 0.3rem 0.75rem;
+            border-radius: 6px;
+            transition: color 0.2s, border-color 0.2s, background 0.2s;
+            text-decoration: none;
+        }
+        .social-link:hover {
+            color: var(--text-1);
+            border-color: rgba(59,130,246,0.4);
+            background: rgba(59,130,246,0.08);
+        }
+
+        /* ============================================
+           SCROLL-TRIGGERED ANIMATION CLASSES
+        ============================================ */
+        .gsap-up    { opacity: 0; transform: translateY(50px); }
+        .gsap-left  { opacity: 0; transform: translateX(-40px); }
+        .gsap-right { opacity: 0; transform: translateX(40px); }
+        .gsap-scale { opacity: 0; transform: scale(0.92); }
+
+        /* ============================================
+           PARALLAX WRAPPER
+        ============================================ */
+        .parallax-img { will-change: transform; }
+
+        /* ============================================
+           QUESTION LIST ITEM
+        ============================================ */
+        .question-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .question-item:last-child { border-bottom: none; }
+        .q-num {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--blue);
+            min-width: 28px;
+            padding-top: 0.1rem;
+        }
+
+        /* ============================================
+           ARM GRID LABEL OVERLAY
+        ============================================ */
+        .arm-tile {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .arm-tile .arm-label {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: linear-gradient(transparent, rgba(8,12,20,0.9));
+            padding: 1rem 0.5rem 0.5rem;
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-2);
+            text-align: center;
+        }
+
+        /* ============================================
+           HORIZONTAL RULE DECORATION
+        ============================================ */
+        .fancy-hr {
+            position: relative;
+            border: none;
+            height: 1px;
+            background: var(--border);
+            margin: 0;
+        }
+        .fancy-hr::before {
+            content: '';
+            position: absolute;
+            left: 50%; top: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px; height: 40px;
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            background: var(--bg);
+        }
+
+        /* ============================================
+           SCROLLBAR
+        ============================================ */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--surface-2); border-radius: 4px; }
+
+        /* ============================================
+           SELECTION
+        ============================================ */
+        ::selection { background: rgba(59,130,246,0.3); color: white; }
+    </style>
 </head>
-
 <body>
 
-<!-- PROGRESS BAR -->
-<div id="progress" class="fixed top-0 left-0 h-1 bg-blue-500 z-50"></div>
-
-<!-- NAV -->
-<nav class="fixed w-full z-40 bg-black/30 backdrop-blur border-b border-white/10">
-  <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between">
-    <div class="font-bold text-lg">ProjectML</div>
-    <div class="space-x-6 text-sm text-slate-300">
-      <a href="#intro">Intro</a>
-      <a href="#data">Data</a>
-      <a href="#models">Models</a>
+<!-- ================================================
+     NAVIGATION
+================================================ -->
+<nav class="fixed top-0 w-full z-50 transition-all duration-300" id="main-nav">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <a href="#hero" class="flex items-center gap-2 group">
+            <div class="w-7 h-7 rounded-md bg-blue-500/20 border border-blue-500/40 flex items-center justify-center">
+                <span class="text-xs">🎮</span>
+            </div>
+            <span class="font-display font-700 text-sm tracking-tight text-white/80 group-hover:text-white transition-colors">DataMining<span class="text-blue-400">.gg</span></span>
+        </a>
+        <div class="hidden md:flex items-center gap-8">
+            <a href="#intro"       class="nav-link">Intro</a>
+            <a href="#data"        class="nav-link">Data</a>
+            <a href="#models"      class="nav-link">Models</a>
+            <a href="#conclusions" class="nav-link">Conclusions</a>
+            <a href="#team"        class="nav-link">Team</a>
+        </div>
+        <!-- Mobile hamburger (visual only) -->
+        <button class="md:hidden flex flex-col gap-1.5 p-2" aria-label="menu">
+            <span class="w-5 h-0.5 bg-slate-400 block"></span>
+            <span class="w-5 h-0.5 bg-slate-400 block"></span>
+            <span class="w-5 h-0.5 bg-slate-400 block"></span>
+        </button>
     </div>
-  </div>
 </nav>
 
-<!-- HERO -->
-<section class="h-screen flex items-center justify-center text-center relative overflow-hidden">
 
-  <!-- Background glow -->
-  <div class="absolute w-[600px] h-[600px] bg-blue-500/20 blur-[120px] rounded-full"></div>
+<!-- ================================================
+     HERO
+================================================ -->
+<section id="hero" class="relative min-h-screen flex flex-col justify-center px-6 pt-24 pb-12 overflow-hidden">
+    <!-- Ambient glow -->
+    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 w-[900px] h-[500px] rounded-full bg-blue-600/5 blur-[120px] pointer-events-none"></div>
 
-  <div class="z-10">
-    <h1 class="text-6xl md:text-8xl font-extrabold leading-tight">
-      <span class="block hero-line opacity-0">Data Mining</span>
-      <span class="block text-gradient hero-line opacity-0">Game Success</span>
-    </h1>
-
-    <p class="mt-6 text-slate-400 max-w-xl mx-auto hero-sub opacity-0">
-      We analyzed 23,000+ games to uncover what makes a game succeed.
-    </p>
-  </div>
-
-</section>
-
-<!-- INTRO SECTION -->
-<section id="intro" class="py-24 max-w-6xl mx-auto px-6">
-
-  <div class="grid md:grid-cols-2 gap-12 items-center">
-
-    <!-- TEXT -->
-    <div>
-      <h2 class="text-4xl font-bold mb-4">Why This Matters</h2>
-      <p class="text-slate-400 mb-6">
-        The gaming industry is highly competitive. We used data mining to identify patterns that separate successful games from failures.
-      </p>
-
-      <div class="grid grid-cols-2 gap-4">
-        <div class="glass p-4 rounded-xl">
-          <p class="text-2xl font-bold text-blue-400">23K+</p>
-          <p class="text-sm text-slate-400">Games analyzed</p>
+    <div class="section-inner max-w-7xl mx-auto w-full">
+        <!-- Eyebrow -->
+        <div class="gsap-up mb-8">
+            <span class="hero-eyebrow">
+                <span>🎮</span> CU Boulder · CSCI 4502 · Data Mining
+            </span>
         </div>
-        <div class="glass p-4 rounded-xl">
-          <p class="text-2xl font-bold text-green-400">4M+</p>
-          <p class="text-sm text-slate-400">Reviews</p>
+
+        <!-- Title -->
+        <h1 class="hero-title gsap-up mb-6" style="animation-delay:0.1s">
+            A Data Mining<br>
+            Approach for<br>
+            <span class="text-gradient-blue">Surviving the</span><br>
+            <span class="text-gradient-blue">Videogame Industry</span>
+        </h1>
+
+        <!-- Subtitle -->
+        <p class="gsap-up text-slate-400 text-lg md:text-xl max-w-xl leading-relaxed mb-12" style="animation-delay:0.2s">
+            How 23,780 Steam games + 4.1M reviews reveal what separates hits from failures — and what that means for indie developers.
+        </p>
+
+        <!-- CTA row -->
+        <div class="gsap-up flex flex-wrap items-center gap-4 mb-20" style="animation-delay:0.3s">
+            <a href="#intro" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-6 py-3 rounded-xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blue-600/25">
+                Explore the Research
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+            <a href="#team" class="inline-flex items-center gap-2 border border-slate-700 hover:border-blue-500/50 text-slate-300 hover:text-white text-sm font-semibold px-6 py-3 rounded-xl transition-all duration-300">
+                Meet the Team
+            </a>
         </div>
-      </div>
+
+        <!-- Stats row -->
+        <div class="gsap-up grid grid-cols-2 md:grid-cols-4 gap-4" style="animation-delay:0.4s">
+            <div class="stat-card">
+                <div class="stat-number">23.7K</div>
+                <div class="stat-label">Steam Apps Analyzed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">4.1M</div>
+                <div class="stat-label">Reviews Processed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">266K</div>
+                <div class="stat-label">Game Screenshots</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">3</div>
+                <div class="stat-label">ML Models Deployed</div>
+            </div>
+        </div>
     </div>
-
-    <!-- IMAGE -->
-    <div class="reveal">
-      <img src="https://placehold.co/800x500" class="rounded-xl border border-white/10"/>
-    </div>
-
-  </div>
-
 </section>
 
-<!-- DATA SECTION -->
-<section id="data" class="py-24 bg-slate-900/50">
-
-  <div class="max-w-6xl mx-auto px-6 text-center mb-16">
-    <h2 class="text-4xl font-bold">Data Pipeline</h2>
-    <p class="text-slate-400 mt-4">How we collected and processed data</p>
-  </div>
-
-  <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-6">
-
-    <div class="glass p-6 rounded-xl">
-      <h3 class="font-bold mb-2">Collection</h3>
-      <p class="text-slate-400 text-sm">Steam APIs used to gather game metadata and reviews.</p>
+<!-- Hero poster image -->
+<div class="relative z-10 max-w-6xl mx-auto px-6 pb-24">
+    <div class="img-wrap img-reveal shadow-2xl shadow-blue-900/20">
+        <img src="https://www.audiovascular.com/assets/data-mining-assets/data-minining-poster.jpeg" alt="Video Game Industry Data Mining — Research Poster" class="parallax-img">
     </div>
+</div>
 
-    <div class="glass p-6 rounded-xl">
-      <h3 class="font-bold mb-2">Cleaning</h3>
-      <p class="text-slate-400 text-sm">Removed noise, HTML, duplicates, and irrelevant tokens.</p>
+<hr class="fancy-hr">
+
+
+<!-- ================================================
+     INTRODUCTION
+================================================ -->
+<section id="intro" class="relative py-32 px-6">
+    <div class="section-inner max-w-7xl mx-auto">
+
+        <!-- Section label + heading -->
+        <div class="max-w-2xl mb-20">
+            <div class="section-label gsap-up">Introduction</div>
+            <h2 class="section-heading gsap-up">The Problem with Indie <br>Game Development</h2>
+        </div>
+
+        <!-- Two-column: text left, insight right -->
+        <div class="grid lg:grid-cols-2 gap-16 items-start mb-24">
+            <div class="space-y-5 text-slate-300 leading-relaxed gsap-left">
+                <p>The video game industry is a multi-billion dollar market growing every year. From Pong on Atari to virtual Fortnite concerts and MMOs connecting players across continents, the medium has evolved into something extraordinary.</p>
+                <p>Steam.com — the dominant PC game distributor — hosts over <strong class="text-white">200,000 games</strong>. Modern game engines have lowered the barrier so much that literally anyone can build a game. The result: a flood of indie developers with wildly varying skills, backgrounds, and know-how.</p>
+                <p>Some are veterans from large studios. Some are CS grads. Some are just passionate players. The common thread? Many have <strong class="text-white">no reliable roadmap</strong> for success in an already brutal, hyper-competitive industry.</p>
+            </div>
+
+            <div class="space-y-4 gsap-right">
+                <div class="content-card">
+                    <div class="text-amber-400 text-2xl mb-3">⚠️</div>
+                    <h4 class="font-display font-700 text-white mb-2">The Advice Problem</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed">Sites like Steamlytics, Gamalytic, and VGInsights give surface-level sentiment overviews. Useful? Barely. Analyzing 10–12 games manually takes an hour of repetitive work — and key insights stay buried.</p>
+                </div>
+                <div class="content-card">
+                    <div class="text-blue-400 text-2xl mb-3">💡</div>
+                    <h4 class="font-display font-700 text-white mb-2">Our Hypothesis</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed">By analyzing thousands of games at scale — reviews, screenshots, descriptions — patterns will emerge that separate successes from failures. Those patterns become actionable developer guidelines.</p>
+                </div>
+                <div class="content-card">
+                    <div class="text-green-400 text-2xl mb-3">🎯</div>
+                    <h4 class="font-display font-700 text-white mb-2">Who Benefits</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed">Indie developers making smarter creative and marketing decisions. Large studios like Valve improving recommendation engines. Players discovering games they'd actually love.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Research Questions -->
+        <div class="gsap-up">
+            <div class="section-label mb-8">Research Questions</div>
+            <div class="grid lg:grid-cols-2 gap-x-16">
+                <div>
+                    <div class="question-item gsap-up">
+                        <span class="q-num">01</span>
+                        <p class="text-slate-300 text-sm leading-relaxed">Do indie games perform differently vs AAA titles in terms of user feedback?</p>
+                    </div>
+                    <div class="question-item gsap-up">
+                        <span class="q-num">02</span>
+                        <p class="text-slate-300 text-sm leading-relaxed">Can we predict a game's success from its promotional materials — descriptions, screenshots, trailers?</p>
+                    </div>
+                    <div class="question-item gsap-up">
+                        <span class="q-num">03</span>
+                        <p class="text-slate-300 text-sm leading-relaxed">How do game trailers impact user reviews and ratings?</p>
+                    </div>
+                    <div class="question-item gsap-up">
+                        <span class="q-num">04</span>
+                        <p class="text-slate-300 text-sm leading-relaxed">Do certain genres consistently score higher in user ratings?</p>
+                    </div>
+                    <div class="question-item gsap-up">
+                        <span class="q-num">05</span>
+                        <p class="text-slate-300 text-sm leading-relaxed">How do regional preferences shape the success of specific genres?</p>
+                    </div>
+                </div>
+                <div>
+                    <div class="question-item gsap-up">
+                        <span class="q-num">06</span>
+                        <p class="text-slate-300 text-sm leading-relaxed">Is trailer length correlated with user ratings?</p>
+                    </div>
+                    <div class="question-item gsap-up">
+                        <span class="q-num">07</span>
+                        <p class="text-slate-300 text-sm leading-relaxed">How does social media activity influence a game's success?</p>
+                    </div>
+                    <div class="question-item gsap-up">
+                        <span class="q-num">08</span>
+                        <p class="text-slate-300 text-sm leading-relaxed">How do game reviews evolve over time post-release?</p>
+                    </div>
+                    <div class="question-item gsap-up">
+                        <span class="q-num">09</span>
+                        <p class="text-slate-300 text-sm leading-relaxed">Are there genres of music commonly found in highly-rated games?</p>
+                    </div>
+                    <div class="question-item gsap-up">
+                        <span class="q-num">10</span>
+                        <p class="text-slate-300 text-sm leading-relaxed">What compositional soundtrack elements correlate with positive reviews?</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="glass p-6 rounded-xl">
-      <h3 class="font-bold mb-2">Transformation</h3>
-      <p class="text-slate-400 text-sm">Converted data into structured formats for modeling.</p>
-    </div>
-
-  </div>
-
 </section>
 
-<!-- MODELS -->
-<section id="models" class="py-24 max-w-6xl mx-auto px-6">
+<hr class="fancy-hr">
 
-  <div class="text-center mb-16">
-    <h2 class="text-4xl font-bold">Models Used</h2>
-    <p class="text-slate-400 mt-4">Machine learning approaches</p>
-  </div>
 
-  <div class="grid md:grid-cols-2 gap-10">
+<!-- ================================================
+     DATA EXPLORATION
+================================================ -->
+<section id="data" class="relative py-32 px-6">
+    <div class="section-inner max-w-7xl mx-auto">
 
-    <div class="glass p-8 rounded-xl">
-      <h3 class="text-xl font-bold mb-3 text-blue-400">CLIP</h3>
-      <p class="text-slate-400 text-sm">
-        Multimodal model linking game images with textual descriptions.
-      </p>
+        <div class="max-w-2xl mb-20">
+            <div class="section-label gsap-up">Data Collection & Exploration</div>
+            <h2 class="section-heading gsap-up">Building the Dataset<br>From the Ground Up</h2>
+        </div>
+
+        <!-- Data Collection — API description -->
+        <div class="grid lg:grid-cols-5 gap-12 items-start mb-24">
+            <div class="lg:col-span-2 gsap-left">
+                <h3 class="font-display font-700 text-2xl text-white mb-4">Steam API Pipeline</h3>
+                <p class="text-slate-300 leading-relaxed mb-6">All data was pulled directly from Steam via three primary API endpoints — no third-party datasets, no scraping proxies. Raw JSON, processed at scale.</p>
+                <p class="text-slate-400 text-sm leading-relaxed">The pipeline fetched app IDs first, then pulled full app details + reviews for each ID. Pagination was handled via cursor-based traversal.</p>
+            </div>
+            <div class="lg:col-span-3 gsap-right">
+                <div class="code-block">
+                    <div class="text-slate-500 text-xs mb-3">// Three API endpoints powering the dataset</div>
+                    <div class="mb-2"><span class="text-green-400">GET</span> api.steampowered.com/ISteamApps/GetAppList/v2/</div>
+                    <div class="text-slate-500 text-xs mb-3">→ Fetches all Steam App IDs</div>
+                    <div class="mb-2"><span class="text-green-400">GET</span> store.steampowered.com/api/appdetails?appids=&lt;ID&gt;</div>
+                    <div class="text-slate-500 text-xs mb-3">→ Full details for a single app</div>
+                    <div class="mb-2"><span class="text-green-400">GET</span> store.steampowered.com/appreviews/&lt;ID&gt;?json=1<br>&nbsp;&nbsp;&nbsp;&nbsp;&amp;num_per_page=100&amp;cursor=&lt;CUR&gt;&amp;filter=recent</div>
+                    <div class="text-slate-500 text-xs">→ Paginated reviews per app</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- JSON Screenshot -->
+        <div class="gsap-up mb-24">
+            <div class="section-label mb-4">Raw API Response</div>
+            <div class="img-wrap img-reveal">
+                <img src="https://www.audiovascular.com/assets/data-mining-assets/json-screenshot.png" alt="JSON API Response Example" class="parallax-img">
+            </div>
+            <p class="viz-caption mt-4">Sample JSON response from the Steam App Details API. Each response contains metadata, pricing, genres, screenshots, trailers, and developer info for a single game.</p>
+        </div>
+
+        <!-- Schema + CSV side by side -->
+        <div class="grid lg:grid-cols-2 gap-8 items-start mb-24">
+            <div class="gsap-left">
+                <div class="section-label mb-4">Data Schema</div>
+                <div class="img-wrap img-reveal">
+                    <img src="https://www.audiovascular.com/assets/data-mining-assets/data-mining-database-schema.png" alt="Database Schema">
+                </div>
+                <p class="viz-caption">The relational schema used to organize Steam data into structured tables — apps, reviews, publishers, developers, and media assets.</p>
+            </div>
+            <div class="gsap-right">
+                <div class="section-label mb-4">CSV Format (Info File)</div>
+                <div class="img-wrap img-reveal">
+                    <img src="https://www.audiovascular.com/assets/data-mining-assets/info-file.png" alt="CSV Data Format">
+                </div>
+                <p class="viz-caption">Cleaned and structured app details in CSV format. HTML tags stripped from descriptions; rows with incoherent descriptions set to empty string rather than dropped — preserving all other useful metadata.</p>
+            </div>
+        </div>
+
+        <!-- Data Stats Big Numbers -->
+        <div class="gsap-up mb-24">
+            <div class="section-label mb-8">Dataset at a Glance</div>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div class="stat-card">
+                    <div class="stat-number">23,780</div>
+                    <div class="stat-label">Total Apps (with details)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">4.19M</div>
+                    <div class="stat-label">App Reviews (text)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">266,688</div>
+                    <div class="stat-label">App Images (URLs)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">25,584</div>
+                    <div class="stat-label">App Trailers (URLs)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">14,687</div>
+                    <div class="stat-label">Unique Developers</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">12,866</div>
+                    <div class="stat-label">Unique Publishers</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction Format -->
+        <div class="grid lg:grid-cols-2 gap-12 items-center mb-24">
+            <div class="gsap-left">
+                <div class="section-label mb-4">Data Cleaning</div>
+                <h3 class="font-display font-700 text-2xl text-white mb-4">Cleaning & Transaction Formatting</h3>
+                <p class="text-slate-300 leading-relaxed mb-4">The CSV pipeline handles most columns cleanly. The exception: the <code class="text-blue-300 bg-blue-900/20 px-1 rounded">description</code> column. HTML tags, special characters, and non-meaningful text required filtering before analysis.</p>
+                <p class="text-slate-400 text-sm leading-relaxed">Crucially, rows with broken descriptions weren't deleted — just set to empty string. The rest of the row's data (developer, genre, price, review counts) remains intact and usable across other analyses.</p>
+                <p class="text-slate-400 text-sm leading-relaxed mt-4">Reviews and descriptions were then transformed into <strong class="text-slate-300">transaction format</strong> (basket data) — a required input for Association Rule Mining in the next phase.</p>
+            </div>
+            <div class="gsap-right">
+                <div class="img-wrap img-reveal">
+                    <img src="https://www.audiovascular.com/assets/data-mining-assets/review-transaction-format.png" alt="Transaction Format Data">
+                </div>
+                <p class="viz-caption">Review data in transaction (basket) format — each row is a document, each column a word token. This structure is required for ARM apriori mining.</p>
+            </div>
+        </div>
+
+        <!-- ---- VISUALIZATIONS ---- -->
+        <div class="gsap-up mb-12">
+            <div class="section-label mb-2">Exploratory Visualizations</div>
+            <h3 class="font-display font-700 text-2xl text-white mb-2">What the Data Reveals</h3>
+            <p class="text-slate-400 leading-relaxed max-w-2xl">Before any models, the raw data tells a story. These visualizations shaped our analytical direction.</p>
+        </div>
+
+        <!-- VIZ 1 + 2: Devs / Publishers — negative -->
+        <div class="grid lg:grid-cols-2 gap-8 mb-8">
+            <div class="gsap-left">
+                <div class="img-wrap img-reveal">
+                    <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/tableau%20graphs/Bottom%20developers/Bottom%20devs.png" alt="Most Negatively Reviewed Developers">
+                </div>
+                <p class="viz-caption">Top 10 most negatively reviewed game developers. Rare Ltd and DICE lead in negative reviews — but notably, both also carry comparable positive review counts, suggesting a polarized audience rather than outright failure.</p>
+            </div>
+            <div class="gsap-right">
+                <div class="img-wrap img-reveal">
+                    <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/tableau%20graphs/Bottom%20Publishers/Bottom%20pubs.png" alt="Most Negatively Reviewed Publishers">
+                </div>
+                <p class="viz-caption">Top 10 most negatively reviewed publishers. Electronic Arts leads in negative reviews — but nearly matches in positives too. Most publishers here have mixed receptions, suggesting consumer ambivalence rather than consistent failure.</p>
+            </div>
+        </div>
+
+        <!-- VIZ 3: Bubble Plot — full width -->
+        <div class="gsap-up mb-8">
+            <div class="img-wrap img-reveal">
+                <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/tableau%20graphs/Bubbleplot/Bubbleplot%20-%20price%20vs%20review%20sentiment.png" alt="Price vs Review Sentiment Bubble Plot">
+            </div>
+            <p class="viz-caption">Price vs. review sentiment. Bubble size = review sentiment ratio (larger = more positive). Color = price (redder = more expensive). Takeaway: pricier games trend toward more positive sentiment — consistent with the reality that budget indie titles often lack the polish of higher-priced releases.</p>
+        </div>
+
+        <!-- VIZ 4 + 5: Pie + Scatterplot -->
+        <div class="grid lg:grid-cols-2 gap-8 mb-8">
+            <div class="gsap-left">
+                <div class="img-wrap img-reveal">
+                    <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/tableau%20graphs/Piechart/Piechart%20-%20App%20type%20vs%20Number%20of%20games.png" alt="App Type Distribution">
+                </div>
+                <p class="viz-caption">App type breakdown. Games dominate the catalog, followed by DLC and music apps. This confirms our decision to filter analysis to game-type apps only.</p>
+            </div>
+            <div class="gsap-right">
+                <div class="img-wrap img-reveal">
+                    <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/tableau%20graphs/Scatterplot/Scatterplot%20-%20Price%20vs%20Reviews.png" alt="Price vs Total Reviews Scatterplot">
+                </div>
+                <p class="viz-caption">Price vs. total reviews (outliers removed). Red = net negative, green = net positive. Most games are positively reviewed. Data concentrates at lower price points — and review volume shows no clear price correlation, suggesting price alone doesn't drive engagement.</p>
+            </div>
+        </div>
+
+        <!-- VIZ 6 + 7: Top devs / pubs positive -->
+        <div class="grid lg:grid-cols-2 gap-8 mb-8">
+            <div class="gsap-left">
+                <div class="img-wrap img-reveal">
+                    <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/tableau%20graphs/Top%2010%20Devs/TOP%2010%20DEVs.png" alt="Top 10 Developers by Positive Reviews">
+                </div>
+                <p class="viz-caption">Top 10 developers by positive reviews. Capcom leads in total reviews, but BioWare holds the highest positive review ratio — quality over quantity.</p>
+            </div>
+            <div class="gsap-right">
+                <div class="img-wrap img-reveal">
+                    <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/tableau%20graphs/Top%2010%20Publishers/Top%2010%20PUBs.png" alt="Top 10 Publishers by Reviews">
+                </div>
+                <p class="viz-caption">Top 10 publishers by review volume. Electronic Arts leads in total reviews, while Arc System Works captures the highest positive review share — a strong signal for fighting-game niche performance.</p>
+            </div>
+        </div>
+
+        <!-- VIZ 8: Genres — full width -->
+        <div class="gsap-up mb-8">
+            <div class="img-wrap img-reveal">
+                <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/Python%20graphs/Top%205%20genre/Top%205%20genre.jpeg" alt="Top 5 Genres by Positive Reviews">
+            </div>
+            <p class="viz-caption">Top 5 genres by positive review count. Action leads comfortably — and critically, these genres show minimal negative review volume. Genre selection is a real signal for success potential.</p>
+        </div>
+
+        <!-- VIZ 9 + 10: Review length plots -->
+        <div class="grid lg:grid-cols-2 gap-8 mb-8">
+            <div class="gsap-left">
+                <div class="img-wrap img-reveal">
+                    <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/histogram-review-lengths.png" alt="Review Length Distribution">
+                </div>
+                <p class="viz-caption">Review length histogram. Short reviews are far more common than long ones — unsurprising for a gaming audience. But the long-tail of detailed reviews is where the richest signal for ARM lives.</p>
+            </div>
+            <div class="gsap-right">
+                <div class="img-wrap img-reveal">
+                    <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/numwords-vs-gameplay-time.png" alt="Playtime vs Review Length">
+                </div>
+                <p class="viz-caption">Review word count vs. playtime before reviewing. Counter-intuitive finding: longer reviews come from players with <em>less</em> playtime. High playtime correlates with shorter, more casual reviews — likely because invested players communicate satisfaction through engagement, not words.</p>
+            </div>
+        </div>
+
     </div>
-
-    <div class="glass p-8 rounded-xl">
-      <h3 class="text-xl font-bold mb-3 text-green-400">Gradient Boosting</h3>
-      <p class="text-slate-400 text-sm">
-        Predicts success using image features like contrast and saturation.
-      </p>
-    </div>
-
-  </div>
-
 </section>
 
-<!-- FOOTER -->
-<footer class="text-center py-10 text-slate-500 text-sm">
-  Built for portfolio impact 🚀
+<hr class="fancy-hr">
+
+
+<!-- ================================================
+     MODELS
+================================================ -->
+<section id="models" class="relative py-32 px-6">
+    <div class="section-inner max-w-7xl mx-auto">
+
+        <div class="max-w-2xl mb-20">
+            <div class="section-label gsap-up">Models Implemented</div>
+            <h2 class="section-heading gsap-up">Three Approaches.<br>One Goal.</h2>
+            <p class="text-slate-400 leading-relaxed mt-4 gsap-up">We combined unsupervised language analysis, multimodal vision-language alignment, and gradient-boosted image feature modeling to cover the full spectrum of game signals.</p>
+        </div>
+
+        <!-- MODEL 1 — ARM -->
+        <div class="mb-32">
+            <div class="flex items-center gap-4 mb-8 gsap-up">
+                <span class="model-badge">Model 01</span>
+                <h3 class="font-display font-700 text-3xl text-white">Association Rule Mining</h3>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-12 items-start mb-12">
+                <div class="gsap-left space-y-4">
+                    <div class="content-card">
+                        <h4 class="text-white font-semibold text-sm uppercase tracking-wider mb-2 text-blue-300">What It Does</h4>
+                        <p class="text-slate-400 text-sm leading-relaxed">ARM extracts frequent word co-occurrence patterns from game reviews, grouped by genre and review sentiment. Using Apriori with support/confidence thresholds, it finds which concepts cluster together in loved vs. disliked games.</p>
+                    </div>
+                    <div class="content-card">
+                        <h4 class="text-white font-semibold text-sm uppercase tracking-wider mb-2 text-blue-300">Data Prep</h4>
+                        <p class="text-slate-400 text-sm leading-relaxed">Reviews were cleaned of punctuation, numbers, stopwords, duplicate tokens, and non-latin characters. Games were labeled positive/negative based on their overall review ratio (positive reviews ÷ total reviews). Basket data was generated per genre across all 10 genres.</p>
+                    </div>
+                    <div class="content-card">
+                        <h4 class="text-white font-semibold text-sm uppercase tracking-wider mb-2 text-blue-300">Thresholds</h4>
+                        <p class="text-slate-400 text-sm leading-relaxed">Positive: support = 0.01, confidence = 0.4<br>Negative: support = 0.02, confidence = 0.55</p>
+                    </div>
+                </div>
+
+                <div class="gsap-right space-y-4">
+                    <div class="section-label mb-2">Raw → Clean Transformation</div>
+                    <div class="img-wrap img-reveal">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/arm/raw-arm-text.png" alt="Raw ARM Text Data">
+                    </div>
+                    <div class="img-wrap img-reveal">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/arm/transaction-data-for-arm.png" alt="Clean Transaction Data for ARM">
+                    </div>
+                    <p class="viz-caption">Before (top) and after (bottom) cleaning. Messy raw review text transformed into tokenized basket format ready for Apriori.</p>
+                </div>
+            </div>
+
+            <!-- Positive ARM grids -->
+            <div class="gsap-up mb-8">
+                <div class="section-label mb-4">Positive Review Association Plots — All 10 Genres</div>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                    <div class="arm-tile img-wrap img-reveal">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/arm/liked-action.png" alt="Liked Action">
+                        <div class="arm-label">Action</div>
+                    </div>
+                    <div class="arm-tile img-wrap img-reveal">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/arm/liked-adventure.png" alt="Liked Adventure">
+                        <div class="arm-label">Adventure</div>
+                    </div>
+                    <div class="arm-tile img-wrap img-reveal">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/arm/liked-casual.png" alt="Liked Casual">
+                        <div class="arm-label">Casual</div>
+                    </div>
+                    <div class="arm-tile img-wrap img-reveal">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/arm/liked-indie.png" alt="Liked Indie">
+                        <div class="arm-label">Indie</div>
+                    </div>
+                    <div class="arm-tile img-wrap img-reveal">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/arm/liked-multiplayer.png" alt="Liked Multiplayer">
+                        <div class="arm-label">Multiplayer</div>
+                    </div>
+                    <div class="arm-tile img-wrap img-reveal">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/arm/liked-racing.png" alt="Liked Racing">
+                        <div class="arm-label">Racing</div>
+                    </div>
+                    <div class="arm-tile img-wrap img-reveal">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/arm/liked-rpg.png" alt="Liked RPG">
+                        <div class="arm-label">RPG</div>
+                    </div>
+                    <div class="arm-tile img-wrap img-reveal">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/arm/liked-simulation.png" alt="Liked Simulation">
+                        <div class="arm-label">Simulation</div>
+                    </div>
+                    <div class="arm-tile img-wrap img-reveal">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/arm/liked-sports.png" alt="Liked Sports">
+                        <div class="arm-label">Sports</div>
+                    </div>
+                    <div class="arm-tile img-wrap img-reveal">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/arm/liked-strategy.png" alt="Liked Strategy">
+                        <div class="arm-label">Strategy</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ARM Positive Insights -->
+            <div class="gsap-up grid md:grid-cols-2 gap-4 mb-12">
+                <div class="content-card border-l-2 border-green-500/50">
+                    <div class="text-green-400 text-lg mb-2">✅</div>
+                    <h4 class="font-semibold text-white mb-2">Insight 1 — Immersion Wins</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed">Quality games let players focus on story and overall experience. Art, music, and mechanics work together invisibly — none of them yanks the player out of the flow.</p>
+                </div>
+                <div class="content-card border-l-2 border-green-500/50">
+                    <div class="text-green-400 text-lg mb-2">📖</div>
+                    <h4 class="font-semibold text-white mb-2">Insight 2 — Story is Central</h4>
+                    <p class="text-slate-400 text-sm leading-relaxed">Story emerges as a hub node across multiple genres in positive reviews. It's not the only element — but it's the one everything else orbits around.</p>
+                </div>
+            </div>
+
+            <!-- Negative ARM grids -->
+            <div class="gsap-up mb-8">
+                <div class="section-label mb-4">Negative Review Association Plots — All 10 Genres</div>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                    <div class="arm-tile img-wrap img-reveal">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/arm/disliked-action.png" alt="Disliked Action">
+                        <div class="arm-label">Action</div>
+                    </div>
+                    <div class="arm-tile img-wrap img-reveal">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/arm/disliked-adventure.png" alt="Disliked Adventure">
+                        <div class="arm-label">Adventure</div>
+                    </div>
+                    <div class="arm-tile img-wrap img-reveal">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/arm/disliked-casual.png" alt="Disliked Casual">
+                        <div class="arm-label">Casual</div>
+                    </div>
+                    <div class="arm-tile img-wrap img-reveal">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/arm/disliked-indie.png" alt="Disliked Indie">
+                        <div class="arm-label">Indie</div>
+                    </div>
+                    <div class="arm-tile img-wrap img-reveal">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/arm/disliked-multiplayer.png" alt="Disliked Multiplayer">
+                        <div class="arm-label">Multiplayer</div>
+                    </div>
+                    <div class="arm-tile img-wrap img-reveal">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/arm/disliked-racing.png" alt="Disliked Racing">
+                        <div class="arm-label">Racing</div>
+                    </div>
+                    <div class="arm-tile img-wrap img-reveal">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/arm/disliked-rpg.png" alt="Disliked RPG">
+                        <div class="arm-label">RPG</div>
+                    </div>
+                    <div class="arm-tile img-wrap img-reveal">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/arm/disliked-simulation.png" alt="Disliked Simulation">
+                        <div class="arm-label">Simulation</div>
+                    </div>
+                    <div class="arm-tile img-wrap img-reveal">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/arm/disliked-sports.png" alt="Disliked Sports">
+                        <div class="arm-label">Sports</div>
+                    </div>
+                    <div class="arm-tile img-wrap img-reveal">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/arm/disliked-strategy.png" alt="Disliked Strategy">
+                        <div class="arm-label">Strategy</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="gsap-up content-card border-l-2 border-red-500/40">
+                <div class="text-red-400 text-lg mb-2">⚡</div>
+                <h4 class="font-semibold text-white mb-2">Negative Review Pattern — Scattered, Not Clustered</h4>
+                <p class="text-slate-400 text-sm leading-relaxed">Unlike positive reviews which cluster around narrative/immersion, negative reviews are fragmented across unrelated themes. The key insight: in multiplayer games, "can't" is the dominant hub — pointing to player agency limitations as the main failure mode. A single broken element can poison an otherwise decent game.</p>
+            </div>
+        </div>
+
+        <!-- MODEL 2 — CLIP -->
+        <div class="mb-32 border-t border-slate-800 pt-16">
+            <div class="flex items-center gap-4 mb-8 gsap-up">
+                <span class="model-badge">Model 02</span>
+                <h3 class="font-display font-700 text-3xl text-white">CLIP — Vision-Language Alignment</h3>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-12 items-start mb-12">
+                <div class="gsap-left space-y-4">
+                    <div class="content-card">
+                        <h4 class="text-blue-300 font-semibold text-sm uppercase tracking-wider mb-2">What It Does</h4>
+                        <p class="text-slate-400 text-sm leading-relaxed">CLIP (OpenAI) is a multimodal model that maps images and text into a shared embedding space. It was trained to match captions to images — giving it zero-shot image classification with no task-specific fine-tuning needed.</p>
+                        <p class="text-slate-400 text-sm leading-relaxed mt-2">Architecture: dual encoder — ViT or ResNet for images, Transformer for text. Similarity = cosine distance in joint embedding space. Scores above 0.2 indicate meaningful alignment for novel image-description pairs.</p>
+                    </div>
+                    <div class="content-card">
+                        <h4 class="text-blue-300 font-semibold text-sm uppercase tracking-wider mb-2">Why We Used It</h4>
+                        <p class="text-slate-400 text-sm leading-relaxed">We needed a way to auto-tag game screenshots with semantic genre/category labels — at scale, without manual annotation. CLIP bridges the visual and textual domains, letting us connect art style to game type automatically.</p>
+                    </div>
+                </div>
+                <div class="gsap-right space-y-4">
+                    <div class="section-label mb-2">Data Cleaning — Before & After</div>
+                    <div class="img-wrap img-reveal">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/clip/clip-messy-data.png" alt="CLIP Messy Data">
+                    </div>
+                    <div class="img-wrap img-reveal">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/clip/clip-clean-data.png" alt="CLIP Clean Data">
+                    </div>
+                    <p class="viz-caption">Game descriptions before (top) and after (bottom) cleaning. Removed irrelevant tokens, special characters, and 404-error image URLs. Cleaner text = better embedding quality.</p>
+                </div>
+            </div>
+
+            <!-- CLIP Results -->
+            <div class="gsap-up mb-8">
+                <div class="section-label mb-4">Model Evaluation — Similarity Scores</div>
+                <div class="img-wrap img-reveal mb-4">
+                    <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/clip/clip-similarity.png" alt="CLIP Similarity Score Matrix">
+                </div>
+                <p class="viz-caption">Cosine similarity matrix between text embeddings (game descriptions) and image embeddings (screenshots). Rows = text, columns = images. For novel pairings, scores above 0.2 signal strong alignment. Diagonal dominance confirms the model correctly matches descriptions to their corresponding game images.</p>
+            </div>
+
+            <div class="gsap-up mb-8">
+                <div class="section-label mb-4">Model Output — Zero-Shot Image Labeling</div>
+                <div class="img-wrap img-reveal mb-4">
+                    <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/clip/clip-output.png" alt="CLIP Output Examples">
+                </div>
+                <p class="viz-caption">CLIP correctly labeled all 10 test images in a zero-shot setting — identifying tags like "space combat simulation," "stealth game," "resource management," and "visual novel" purely from visual content. No fine-tuning. No manual labels.</p>
+            </div>
+
+            <div class="gsap-up content-card border-l-2 border-cyan-500/40">
+                <div class="text-cyan-400 text-lg mb-2">🔍</div>
+                <h4 class="font-semibold text-white mb-2">What This Unlocks for Developers</h4>
+                <p class="text-slate-400 text-sm leading-relaxed">A developer can now drop a single game screenshot and instantly get genre tags — then use those tags to find similar successful games for inspiration. This makes finding comparable games 10–100x faster than manual research. Combined with CLIP-powered recommendation systems, it could meaningfully improve game discovery for players too.</p>
+            </div>
+        </div>
+
+        <!-- MODEL 3 — Gradient Boosting -->
+        <div class="border-t border-slate-800 pt-16">
+            <div class="flex items-center gap-4 mb-8 gsap-up">
+                <span class="model-badge">Model 03</span>
+                <h3 class="font-display font-700 text-3xl text-white">Gradient Boosting — Image Feature Analysis</h3>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-12 items-start mb-12">
+                <div class="gsap-left space-y-4">
+                    <div class="content-card">
+                        <h4 class="text-blue-300 font-semibold text-sm uppercase tracking-wider mb-2">What It Does</h4>
+                        <p class="text-slate-400 text-sm leading-relaxed">Gradient Boosting builds models sequentially — each new weak learner (decision tree) corrects errors from the previous. The ensemble becomes a powerful predictor for regression and classification tasks with non-linear patterns.</p>
+                        <p class="text-slate-400 text-sm leading-relaxed mt-2">We used it to predict game success (positive review ratio) from image features: brightness, saturation, hue, and contrast extracted from game screenshots.</p>
+                    </div>
+                    <div class="content-card">
+                        <h4 class="text-blue-300 font-semibold text-sm uppercase tracking-wider mb-2">Dataset Construction</h4>
+                        <p class="text-slate-400 text-sm leading-relaxed">A custom dataset was built from image URLs — extracting per-image brightness, contrast, saturation, and hue values, linked back to app IDs and their success rates. This gave the model visual-quantitative features to learn from.</p>
+                    </div>
+                </div>
+                <div class="gsap-right">
+                    <div class="section-label mb-4">Dataset Creation</div>
+                    <div class="img-wrap img-reveal mb-4">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/clip/create-dataset.png" alt="Dataset Creation Code">
+                    </div>
+                    <p class="viz-caption">Code generating the image feature dataset. Each row = one game app, with extracted visual metrics as features and review ratio as the target variable.</p>
+                </div>
+            </div>
+
+            <!-- GB Results -->
+            <div class="grid lg:grid-cols-2 gap-8 mb-8">
+                <div class="gsap-left">
+                    <div class="section-label mb-4">Model Performance — MSE</div>
+                    <div class="img-wrap img-reveal mb-4">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/clip/gb-mse.png" alt="Gradient Boosting MSE">
+                    </div>
+                    <p class="viz-caption">Mean Squared Error = 130. Lower is better — this value confirms the model learns the relationship between image features and game success effectively, with predictions staying reasonably close to actual review ratios.</p>
+                </div>
+                <div class="gsap-right">
+                    <div class="section-label mb-4">Model Output</div>
+                    <div class="img-wrap img-reveal mb-4">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/clip/gb-output.png" alt="Gradient Boosting Output">
+                    </div>
+                    <p class="viz-caption">The model assigns higher predicted success rates to games with visually dynamic screenshots, and lower rates to dull or confusing imagery — validating the hypothesis that visual presentation correlates with player reception.</p>
+                </div>
+            </div>
+
+            <!-- GB Feature plots grid -->
+            <div class="gsap-up mb-8">
+                <div class="section-label mb-6">Feature Analysis — What Visual Attributes Matter?</div>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <div class="img-wrap img-reveal mb-3">
+                            <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/clip/gb-heatmap.png" alt="Correlation Heatmap">
+                        </div>
+                        <p class="viz-caption"><strong class="text-slate-300">Correlation Heatmap.</strong> Most features are independent of each other. The one notable exception: contrast and brightness share moderate correlation — which makes intuitive sense visually.</p>
+                    </div>
+                    <div>
+                        <div class="img-wrap img-reveal mb-3">
+                            <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/clip/gb-saturation.png" alt="Saturation vs Success Rate">
+                        </div>
+                        <p class="viz-caption"><strong class="text-slate-300">Saturation vs. Success Rate.</strong> Negative correlation — more saturated images tend to predict lower review ratios. Over-saturated, garish visuals may signal lower production quality.</p>
+                    </div>
+                    <div>
+                        <div class="img-wrap img-reveal mb-3">
+                            <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/clip/gb-contrast.png" alt="Contrast vs Success Rate">
+                        </div>
+                        <p class="viz-caption"><strong class="text-slate-300">Contrast vs. Success Rate.</strong> There's a sweet spot: contrast between 50–80 correlates with higher success rates. Too low = flat, muddy visuals. Too high = harsh, eye-straining visuals. Both hurt.</p>
+                    </div>
+                    <div>
+                        <div class="img-wrap img-reveal mb-3">
+                            <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/clip/gb-hue.png" alt="Hue vs Success Rate">
+                        </div>
+                        <p class="viz-caption"><strong class="text-slate-300">Hue vs. Success Rate.</strong> Boxplot shows similar success distributions across all hue ranges — color choice alone doesn't predict success. Slight edge for greens/yellows (hue 101–127), but not statistically conclusive.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Brightness full-width -->
+            <div class="gsap-up mb-8">
+                <div class="img-wrap img-reveal mb-4">
+                    <img src="https://www.audiovascular.com/assets/data-mining-assets/visualisations/clip/gb-brightness.png" alt="Brightness vs Success Rate">
+                </div>
+                <p class="viz-caption"><strong class="text-slate-300">Brightness vs. Success Rate.</strong> No clear correlation found. Brightness is not a reliable predictor of game success — developers can use the full brightness range without performance penalties.</p>
+            </div>
+
+            <div class="gsap-up content-card border-l-2 border-amber-500/40">
+                <div class="text-amber-400 text-lg mb-2">🎨</div>
+                <h4 class="font-semibold text-white mb-2">Actionable Takeaways for Art Direction</h4>
+                <p class="text-slate-400 text-sm leading-relaxed">Target contrast between 50–80 in screenshots. Avoid over-saturation — clean, controlled color palettes outperform maximalist ones. Brightness is a free variable. Hue is largely irrelevant. These findings give concept artists and art directors a data-backed checklist for screenshot production and marketing asset creation.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="fancy-hr">
+
+
+<!-- ================================================
+     CONCLUSIONS
+================================================ -->
+<section id="conclusions" class="relative py-32 px-6">
+    <div class="section-inner max-w-7xl mx-auto">
+
+        <div class="max-w-2xl mb-20">
+            <div class="section-label gsap-up">Conclusions</div>
+            <h2 class="section-heading gsap-up">What 4 Million Reviews<br>Taught Us</h2>
+        </div>
+
+        <!-- Key findings as big cards -->
+        <div class="grid lg:grid-cols-3 gap-6 mb-20">
+            <div class="content-card gsap-up">
+                <div class="text-4xl mb-4">📖</div>
+                <h3 class="font-display font-700 text-xl text-white mb-3">Story is the Spine</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">Across genres, story emerged as the central node in positive reviews. Games are interactive art — and like all art forms, they're fundamentally about storytelling. A weak narrative undermines everything else.</p>
+            </div>
+            <div class="content-card gsap-up">
+                <div class="text-4xl mb-4">🎵</div>
+                <h3 class="font-display font-700 text-xl text-white mb-3">Supporting Elements Must Be Invisible</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">In great games, music, art, and mechanics don't draw attention to themselves — they support immersion. If a player notices the soundtrack, that's probably a problem. The best work disappears into the experience.</p>
+            </div>
+            <div class="content-card gsap-up">
+                <div class="text-4xl mb-4">🎯</div>
+                <h3 class="font-display font-700 text-xl text-white mb-3">Player Agency is Non-Negotiable</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">In multiplayer games, "can't" dominated negative reviews — indicating constrained agency as a primary failure mode. Freedom within structure is the design challenge. Too many walls = player frustration, regardless of other qualities.</p>
+            </div>
+            <div class="content-card gsap-up">
+                <div class="text-4xl mb-4">🖼️</div>
+                <h3 class="font-display font-700 text-xl text-white mb-3">Art = First Impression, Every Time</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">CLIP demonstrated that a single screenshot communicates genre, tone, and quality before a player reads a single word. Art makes or breaks the initial hook — and our model showed it can be automated and analyzed at scale.</p>
+            </div>
+            <div class="content-card gsap-up">
+                <div class="text-4xl mb-4">📐</div>
+                <h3 class="font-display font-700 text-xl text-white mb-3">Contrast Matters. Saturation Hurts.</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">Optimal contrast (50–80 range) correlates with higher-rated games. High saturation correlates negatively with success. These are concrete, data-backed guidelines for visual design decisions — not hunches.</p>
+            </div>
+            <div class="content-card gsap-up">
+                <div class="text-4xl mb-4">🔭</div>
+                <h3 class="font-display font-700 text-xl text-white mb-3">This is Just the Beginning</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">Reviews and screenshots are one slice of the signal. Music, sound design, lighting, interaction design, and platform-specific patterns remain untouched. The methodology scales — and so do the potential insights.</p>
+            </div>
+        </div>
+
+        <!-- Long-form conclusion text — readable, structured -->
+        <div class="max-w-3xl mx-auto space-y-6 text-slate-300 leading-relaxed gsap-up">
+            <p>Video games are interactive mediums for art. They bring together narrative design, visual art, music, sound, and mechanical systems into a single coherent experience. Our results showed that this coherence — specifically, a quality story — is one of the most appreciated elements across genres.</p>
+
+            <p>This raises a natural question: does story outrank everything else? We argue no. Without strong supporting elements, even a brilliant narrative falls flat. The massively multiplayer genre is instructive — in negatively reviewed MMOs, the dominant theme was <em>limitation</em>. Players couldn't do what they wanted. The game itself had become the obstacle. Good game design, sound, and art are invisible precisely because they enable rather than restrict.</p>
+
+            <p>In the visual domain, we demonstrated that a static screenshot can be automatically tagged with genre and context at high accuracy — zero-shot, with no fine-tuning. This gives developers a practical tool: drop a piece of game art, discover its genre neighbors, and draw inspiration from successful titles in that space. Innovation in games historically comes from combining influences — this makes finding those influences dramatically faster.</p>
+
+            <p>We also identified a quantitative link between image properties and game success. Contrast and saturation carry signal. The optimal contrast band (50–80) predicts better-performing games. High saturation predicts worse ones. These aren't aesthetic opinions — they're data-derived guidelines for art directors.</p>
+
+            <p>Future work could integrate audio features, soundtrack analysis, lighting design patterns, story arc modeling from dialogue datasets, and platform-specific behavioral patterns. The dataset infrastructure built here supports all of it.</p>
+        </div>
+    </div>
+</section>
+
+<hr class="fancy-hr">
+
+
+<!-- ================================================
+     TEAM
+================================================ -->
+<section id="team" class="relative py-32 px-6 bg-gradient-to-b from-transparent to-slate-900/40">
+    <div class="section-inner max-w-6xl mx-auto">
+
+        <div class="text-center mb-16">
+            <div class="section-label justify-center gsap-up">The Team</div>
+            <h2 class="section-heading gsap-up">Built by Four Researchers<br>at CU Boulder</h2>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6">
+
+            <!-- Atharva -->
+            <div class="team-card gsap-up">
+                <div class="flex items-start gap-4 mb-4">
+                    <div class="avatar">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/team/atharva-photo.jpg" alt="Atharva Sachin Patil">
+                    </div>
+                    <div>
+                        <h3 class="font-display font-700 text-xl text-white leading-tight">Atharva Sachin Patil</h3>
+                        <p class="text-blue-400 text-xs font-medium mt-1">MS Data Science · CU Boulder</p>
+                    </div>
+                </div>
+                <p class="text-slate-400 text-sm leading-relaxed mb-5">B.Tech in Information Technology from University of Mumbai. Passionate about applying machine learning and AI models to real-world challenges — from data pipelines to model deployment.</p>
+                <div class="flex flex-wrap gap-2">
+                    <a href="https://www.linkedin.com/in/atharvapatil" target="_blank" rel="noopener" class="social-link">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+                        LinkedIn
+                    </a>
+                    <a href="https://github.com/atharvapatil" target="_blank" rel="noopener" class="social-link">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                        GitHub
+                    </a>
+                    <a href="/cdn-cgi/l/email-protection#c9a8bda1a8bbbfa8e7b9a8bda0a589aaa6a5a6bba8ada6e7acadbc" class="social-link">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        <span class="__cf_email__" data-cfemail="31504559504347501f415045585d71525e5d5e4350555e1f545544">[email&#160;protected]</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Deep -->
+            <div class="team-card gsap-up">
+                <div class="flex items-start gap-4 mb-4">
+                    <div class="avatar">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/team/deep-cropped.png" alt="Deep Kalpesh Shukla">
+                    </div>
+                    <div>
+                        <h3 class="font-display font-700 text-xl text-white leading-tight">Deep Kalpesh Shukla</h3>
+                        <p class="text-blue-400 text-xs font-medium mt-1">MS Data Science · CU Boulder</p>
+                    </div>
+                </div>
+                <p class="text-slate-400 text-sm leading-relaxed mb-5">B.E. in AI & Data Science from Mumbai University (Thadomal Shahani Engineering College). Focused on machine learning systems, NLP, and turning messy data into actionable insight.</p>
+                <div class="flex flex-wrap gap-2">
+                    <a href="https://linkedin.com/in/deep-shukla-b4035220a" target="_blank" rel="noopener" class="social-link">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+                        LinkedIn
+                    </a>
+                    <a href="https://github.com/623dks" target="_blank" rel="noopener" class="social-link">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                        GitHub
+                    </a>
+                    <a href="/cdn-cgi/l/email-protection#ed8988889dc39e859886818cad8e8281829f8c8982c3888998" class="social-link">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        <span class="__cf_email__" data-cfemail="89edececf9a7fae1fce2e5e8c9eae6e5e6fbe8ede6a7ecedfc">[email&#160;protected]</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Daniel -->
+            <div class="team-card gsap-up md:col-span-2">
+                <div class="flex flex-col sm:flex-row items-start gap-5 mb-4">
+                    <div class="avatar w-20 h-20 flex-shrink-0" style="width:80px;height:80px;">
+                        <img src="https://www.audiovascular.com/assets/profile-photo-cropped.jpg" alt="Daniel Ethridge">
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex flex-wrap items-center gap-3 mb-1">
+                            <h3 class="font-display font-700 text-xl text-white leading-tight">Daniel Ethridge</h3>
+                            <span class="text-xs border border-amber-500/30 text-amber-400 px-2 py-0.5 rounded-full">PhD Researcher</span>
+                        </div>
+                        <p class="text-blue-400 text-xs font-medium">Music Perception & Cognition · ATLAS Institute · CU Boulder</p>
+                    </div>
+                </div>
+                <p class="text-slate-400 text-sm leading-relaxed mb-2">From Atlanta, Georgia. Musician, sound engineer, and software engineer working at the intersection of music, physiology, and technology. His PhD research focuses on music perception and cognition through cardiac signals — heart rate and HRV — applying data mining and ML to audiovisual and physiological data available online.</p>
+                <p class="text-slate-400 text-sm leading-relaxed mb-5">B.S. in Mathematics & Music from Brevard College (NC). M.S. in Music Technology from Georgia Institute of Technology. Currently advised by Dr. Grace Leslie, director of the Brain Music Lab at the ATLAS Institute.</p>
+                <div class="flex flex-wrap gap-2">
+                    <a href="https://www.audiovascular.com" target="_blank" rel="noopener" class="social-link">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        audiovascular.com
+                    </a>
+                    <a href="https://github.com/daniel-ethridge" target="_blank" rel="noopener" class="social-link">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                        GitHub
+                    </a>
+                    <a href="/cdn-cgi/l/email-protection#96f2f7f8fff3fab8f3e2fee4fff2f1f3d6f5f9faf9e4f7f2f9b8f3f2e3" class="social-link">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        <span class="__cf_email__" data-cfemail="a6c2c7c8cfc3ca88c3d2ced4cfc2c1c3e6c5c9cac9d4c7c2c988c3c2d3">[email&#160;protected]</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Sujith -->
+            <div class="team-card gsap-up md:col-span-2">
+                <div class="flex items-start gap-4 mb-4">
+                    <div class="avatar">
+                        <img src="https://www.audiovascular.com/assets/data-mining-assets/team/sujith-photo.jpeg" alt="Sujith Battu">
+                    </div>
+                    <div>
+                        <h3 class="font-display font-700 text-xl text-white leading-tight">Sujith Battu</h3>
+                        <p class="text-blue-400 text-xs font-medium mt-1">MS Data Science · CU Boulder</p>
+                    </div>
+                </div>
+                <p class="text-slate-400 text-sm leading-relaxed mb-5">Passionate about large-scale data collection and medical image analysis. Completed an internship at the Defense Research and Development Organization (DRDO), gaining hands-on experience in data modeling techniques. Aspiring data scientist focused on high-impact applications.</p>
+                <div class="flex flex-wrap gap-2">
+                    <a href="https://www.linkedin.com/in/sujithbattu" target="_blank" rel="noopener" class="social-link">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+                        LinkedIn
+                    </a>
+                    <a href="https://github.com/sujithbattu" target="_blank" rel="noopener" class="social-link">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                        GitHub
+                    </a>
+                    <a href="/cdn-cgi/l/email-protection#d3a0a6b9baa7bbfdb1b2a7a7a693b0bcbfbca1b2b7bcfdb6b7a6" class="social-link">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        <span class="__cf_email__" data-cfemail="0d7e7867647965236f6c7979784d6e6261627f6c696223686978">[email&#160;protected]</span>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ================================================
+     FOOTER
+================================================ -->
+<footer class="relative z-10 border-t border-slate-800 py-10 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex items-center gap-2">
+            <span class="text-lg">🎮</span>
+            <span class="font-display font-600 text-sm text-slate-400">DataMining<span class="text-blue-400">.gg</span></span>
+        </div>
+        <p class="text-slate-600 text-xs">CSCI 4502 · Data Mining · University of Colorado Boulder · 2024</p>
+        <p class="text-slate-600 text-xs">Atharva · Deep · Daniel · Sujith</p>
+    </div>
 </footer>
 
-<!-- ANIMATIONS -->
-<script>
-gsap.registerPlugin(ScrollTrigger);
 
-// HERO animation
-const tl = gsap.timeline();
+<!-- ================================================
+     GSAP ANIMATION SCRIPT
+================================================ -->
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    gsap.registerPlugin(ScrollTrigger);
 
-tl.to(".hero-line", {
-  opacity: 1,
-  y: -20,
-  stagger: 0.2,
-  duration: 1,
-  ease: "power4.out"
-});
+    /* ============================================
+       HERO — Staggered entrance
+    ============================================ */
+    gsap.fromTo(".gsap-up",
+        { y: 60, opacity: 0 },
+        {
+            y: 0, opacity: 1,
+            duration: 1.1,
+            ease: "power3.out",
+            stagger: 0.12,
+            delay: 0.2
+        }
+    );
 
-tl.to(".hero-sub", {
-  opacity: 1,
-  y: -10,
-  duration: 1
-}, "-=0.5");
+    /* ============================================
+       SCROLL-TRIGGERED REVEALS
+       All .gsap-up, .gsap-left, .gsap-right,
+       .gsap-scale outside the hero
+    ============================================ */
 
-// PROGRESS BAR
-gsap.to("#progress", {
-  width: "100%",
-  scrollTrigger: {
-    scrub: true
-  }
-});
+    // Helper: register scroll trigger for any selector
+    function scrollReveal(selector, xFrom, yFrom, delay) {
+        gsap.utils.toArray(selector).forEach(function(el, i) {
+            // Skip hero elements (already animated above)
+            if (el.closest('#hero')) return;
 
-// REVEAL IMAGES
-gsap.utils.toArray(".reveal").forEach(el => {
-  gsap.to(el, {
-    clipPath: "inset(0% 0 0 0)",
-    duration: 1.2,
-    ease: "power4.out",
-    scrollTrigger: {
-      trigger: el,
-      start: "top 80%"
+            gsap.fromTo(el,
+                { x: xFrom || 0, y: yFrom || 0, opacity: 0, scale: el.classList.contains('gsap-scale') ? 0.93 : 1 },
+                {
+                    x: 0, y: 0, opacity: 1, scale: 1,
+                    duration: 1.0,
+                    ease: "power3.out",
+                    delay: delay || 0,
+                    scrollTrigger: {
+                        trigger: el,
+                        start: "top 88%",
+                        toggleActions: "play none none none"
+                    }
+                }
+            );
+        });
     }
-  });
-});
-</script>
 
-</body>
-</html>
+    scrollReveal('.gsap-up',    0,   50);
+    scrollReveal('.gsap-left', -40,   0);
+    scrollReveal('.gsap-right', 40,   0);
+    scrollReveal('.gsap-scale',  0,   0);
+
+    /* ============================================
+       IMAGE REVEAL — Clip-path mask wipe
+       Feels premium, like agency-level sites
+    ============================================ */
+    gsap.utils.toArray('.img-reveal').forEach(function(el) {
+        gsap.fromTo(el,
+            { clipPath: 'inset(100% 0% 0% 0%)' },
+            {
+                clipPath: 'inset(0% 0% 0% 0%)',
+                duration: 1.1,
+                ease: "power4.inOut",
+                scrollTrigger: {
+                    trigger: el,
+                    start: "top 90%",
+                    toggleActions: "play none none none"
+                }
+            }
+        );
+    });
+
+    /* ============================================
+       PARALLAX — Subtle depth on large images
+    ============================================ */
+    gsap.utils.toArray('.parallax-img').forEach(function(img) {
+        gsap.fromTo(img,
+            { y: -30 },
+            {
+                y: 30,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: img.closest('.img-wrap') || img,
+                    start: "top bottom",
+                    end: "bottom top",
+                    scrub: true
+                }
+            }
+        );
+    });
+
+    /* ============================================
+       STAT CARDS — Counter animation
+    ============================================ */
+    gsap.utils.toArray('.stat-number').forEach(function(el) {
+        ScrollTrigger.create({
+            trigger: el,
+            start: "top 85%",
+            once: true,
+            onEnter: function() {
+                el.style.opacity = '0';
+                gsap.to(el, {
+                    opacity: 1,
+                    duration: 0.6,
+                    ease: "power2.out"
+                });
+                // Subtle scale pop
+                gsap.fromTo(el,
+                    { scale: 0.8 },
+                    { scale: 1, duration: 0.7, ease: "back.out(1.4)" }
+                );
+            }
+        });
+    });
+
+    /* ============================================
+       NAV — Change bg on scroll
+    ============================================ */
+    ScrollTrigger.create({
+        start: "top -80",
+        onUpdate: function(self) {
+            var nav = document.getElementById('main-nav');
+            if (self.progress > 0) {
+                nav.style.borderBottomColor = 'rgba(255,255,255,0.07)';
+                nav.style.background = 'rgba(8,12,20,0.95)';
+            } else {
+                nav.style.borderBottomColor = 'transparent';
+                nav.style.background = 'rgba(8,12,20,0.0)';
+            }
+        }
+    });
+
+    /* ============================================
+       HORIZONTAL RULE ROTATION decorative element
+    ============================================ */
+    gsap.utils.toArray('.fancy-hr::before').forEach(function(el) {
+        if (!el) return;
+        gsap.to(el, {
+            rotation: 360,
+            duration: 20,
+            ease: "none",
+            repeat: -1
+        });
+    });
+
+    /* ============================================
+       ARM TILES — stagger cascade reveal
+    ============================================ */
+    gsap.utils.toArray('.arm-tile').forEach(function(el, i) {
+        gsap.fromTo(el,
+            { opacity: 0, y: 20 },
+            {
+                opacity: 1, y: 0,
+                duration: 0.5,
+                delay: (i % 5) * 0.07,
+                ease: "power2.out",
+                scrollTrigger: {
+                    trigger: el,
+                    start: "top 92%",
+                    toggleActions: "play none none none"
+                }
+            }
+        );
+    });
+
+    /* ============================================
+       QUESTION ITEMS — subtle stagger
+    ============================================ */
+    gsap.utils.toArray('.question-item').forEach(function(el, i) {
+        gsap.fromTo(el,
+            { opacity: 0, x: -16 },
+            {
+                opacity: 1, x: 0,
+                duration: 0.5,
+                ease: "power2.out",
+                scrollTrigger: {
+                    trigger: el,
+                    start: "top 90%",
+                    toggleActions: "play none none none"
+                }
+            }
+        );
+    });
+
+    /* ============================================
+       TEAM CARDS — scale + fade stagger
+    ============================================ */
+    gsap.utils.toArray('.team-card').forEach(function(el, i) {
+        gsap.fromTo(el,
+            { opacity: 0, y: 30, scale: 0.97 },
+            {
+                opacity: 1, y: 0, scale: 1,
+                duration: 0.8,
+                delay: (i % 2) * 0.12,
+                ease: "power3.out",
+                scrollTrigger: {
+                    trigger: el,
+                    start: "top 88%",
+                    toggleActions: "p
